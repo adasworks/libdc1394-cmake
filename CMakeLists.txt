@@ -150,3 +150,14 @@ if(EXAMPLESMSG)
 	message(STATUS "Build XV examples:                ${XVEXAMPLESMSG}")
 	message(STATUS "Build V4L examples:               ${VIDEXAMPLESMSG}")
 endif()
+
+# Makefile.am
+# process this file with automake to create a Makefile.in
+
+add_definitions(-DHAVE_CONFIG)
+add_subdirectory(dc1394)
+if(MAKE_EXAMPLES)
+	add_subdirectory(examples)
+endif()
+
+
