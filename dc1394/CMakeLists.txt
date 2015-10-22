@@ -61,6 +61,7 @@ endif()
 target_include_directories(libdc1394 PUBLIC
 	$<BUILD_INTERFACE:${CSD}>
 	$<BUILD_INTERFACE:${CSD}/..>
+	$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
 	$<INSTALL_INTERFACE:include>)
 install(FILES
 	${CSD}/dc1394.h

@@ -49,7 +49,8 @@ foreach(r restrict __restrict _Restrict __restrict__ __RESTRICT)
 		break()
 	endif()
 endforeach()
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/config.h "")
+set(cfg ${PROJECT_BINARY_DIR}/config.h)
+file(WRITE ${cfg} "")
 # need to define size_t if you compiler does not support it: Define to `unsigned int' if <sys/types.h> does not define.
 foreach(v
 	HAVE_LIBRAW1394
@@ -63,16 +64,16 @@ foreach(v
 	HAVE_WINDOWS
 )
 	if(${v})
-		file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/config.h "#define ${v} 1\n")
+		file(APPEND ${cfg} "#define ${v} 1\n")
 	else()
-		file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/config.h "/* #undef ${v} */\n")
+		file(APPEND ${cfg} "/* #undef ${v} */\n")
 	endif()
 endforeach()
-file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/config.h "#define PACKAGE \"${PACKAGE}\"\n")
+file(APPEND ${cfg} "#define PACKAGE \"${PACKAGE}\"\n")
 if(C99_RESTRICT STREQUAL "restrict")
-	file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/config.h "/* #undef restrict */\n")
+	file(APPEND ${cfg} "/* #undef restrict */\n")
 else()
-	file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/config.h "#define restrict ${C99_RESTRICT}\n")
+	file(APPEND ${cfg} "#define restrict ${C99_RESTRICT}\n")
 endif()
 
 check_include_file(linux/videodev.h HAVE_VIDEODEV) # used in am
