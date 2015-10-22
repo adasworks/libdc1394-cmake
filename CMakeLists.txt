@@ -140,7 +140,7 @@ endif()
 
 message(STATUS "Linux support:                    ${LINUXMSG}")
 if(LINUXMSG STREQUAL "Enabled")
-	message(STATUS "Legacy drivers (libraw1394):    ${RAW1394MSG}")
+	message(STATUS "Legacy drivers (libraw1394):      ${RAW1394MSG}")
 endif()
 message(STATUS "Mac OS X support:                 ${MACOSXMSG}")
 message(STATUS "Windows support:                  ${WINDOWSMSG}")
