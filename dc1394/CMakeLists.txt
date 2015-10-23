@@ -65,6 +65,11 @@ target_include_directories(libdc1394 PUBLIC
 	$<BUILD_INTERFACE:${CSD}/..>
 	$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
 	$<INSTALL_INTERFACE:include>)
+if(HAVE_WINDOWS)
+	target_include_directories(libdc1394 PRIVATE
+		${PROJECT_SOURCE_DIR}/1394camera646/1394camera)
+endif()
+
 target_link_libraries(libdc1394 ${dc1394_link_libs})
 install(FILES
 	${CSD}/dc1394.h
