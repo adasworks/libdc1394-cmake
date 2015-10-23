@@ -156,6 +156,7 @@ endif()
 # process this file with automake to create a Makefile.in
 
 add_definitions(-DHAVE_CONFIG)
+set(CSD ${PROJECT_SOURCE_DIR}/libdc1394/libdc1394)
 add_subdirectory(dc1394)
 if(MAKE_EXAMPLES)
 	add_subdirectory(examples)

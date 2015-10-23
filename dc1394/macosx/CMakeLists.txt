@@ -5,6 +5,8 @@ set(macosx_src
 	${CSD}/macosx.h
 	PARENT_SCOPE)
 
-
+set(dc1394_link_libs ${dc1394_link_libs}
+	PUBLIC "-framework CoreServices" "-framework IOKit"
+	PARENT_SCOPE)
 
 

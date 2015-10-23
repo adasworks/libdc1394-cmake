@@ -1,4 +1,4 @@
-set(CSD ${PROJECT_SOURCE_DIR}/libdc1394/libdc1394/dc1394)
+set(CSD ${CSD}/dc1394)
 
 set(dc1394_sources "")
 set(dc1394_link_libs "")
@@ -65,6 +65,7 @@ target_include_directories(libdc1394 PUBLIC
 	$<BUILD_INTERFACE:${CSD}/..>
 	$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
 	$<INSTALL_INTERFACE:include>)
+target_link_libraries(libdc1394 ${dc1394_link_libs})
 install(FILES
 	${CSD}/dc1394.h
 	${CSD}/types.h
