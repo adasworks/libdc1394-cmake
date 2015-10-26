@@ -9,7 +9,10 @@ if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/libdc1394)
     find_package(Git QUIET REQUIRED)
     execute_process(
         COMMAND ${GIT_EXECUTABLE}
-            clone --depth 1 git://git.code.sf.net/p/libdc1394/code ${CMAKE_CURRENT_SOURCE_DIR}/libdc1394
+            clone --depth 1
+            	# git://git.code.sf.net/p/libdc1394/code # original project
+            	git://git.code.sf.net/u/adasworks/libdc1394 # adasworks fork
+            	${CMAKE_CURRENT_SOURCE_DIR}/libdc1394
         RESULT_VARIABLE r)
     if(r)
         message(FATAL_ERROR "git-cloning libdc1394 failed.")
