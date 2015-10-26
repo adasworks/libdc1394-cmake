@@ -32,6 +32,7 @@ if(APPLE AND NOT IOS)
 	set(HAVE_MACOSX 1) # used in c am
 endif()
 check_include_file(netinet/in.h HAVE_NETINET_IN_H) # used in c
+check_include_file(unistd.h HAVE_UNISTD_H) # used in c
 find_package(OpenGL QUIET)
 if(OPENGL_FOUND)
 	set(HAVE_OPENGL 1) # used in am
@@ -59,6 +60,7 @@ foreach(v
 	HAVE_LINUX
 	HAVE_MACOSX
 	HAVE_NETINET_IN_H
+	HAVE_UNISTD_H
 	HAVE_OPENGL
 	HAVE_SYS_MMAN_H
 	HAVE_WINDOWS
