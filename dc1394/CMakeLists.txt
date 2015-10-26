@@ -14,7 +14,7 @@ if(HAVE_MACOSX)
 	list(APPEND dc1394_sources ${CSD}/macosx.c)
 	add_subdirectory(macosx)
 endif()
-if(HAVE_WINDOWS)
+if(HAVE_WINDOWS AND NOT HAVE_NO_CMU1394)
 	add_subdirectory(windows)
 endif()
 if(HAVE_LIBUSB)
@@ -86,21 +86,6 @@ install(FILES
 	${CSD}/iso.h
 	DESTINATION include/dc1394
 )
-
-# MSVC <= 2013 (12.0, 1800) does not support C `inline`
-if(MSVC AND MSVC_VERSION LESS 1900)
-	# we need to patch the installed register.h as well
-	configure_file(${CSD}/register.h ${PROJECT_BINARY_DIR}/register_patched.h)
-	file(READ ${PROJECT_BINARY_DIR}/register_patched.h rp)
-	string(REGEX REPLACE "([^0-9a-zA-Z_])inline([^0-9a-zA-Z_])" "\\1__inline\\2" rp "${rp}")
-	file(WRITE ${PROJECT_BINARY_DIR}/register_patched.h "${rp}")
-	install(FILES ${PROJECT_BINARY_DIR}/register_patched.h DESTINATION include/dc1394
-		RENAME register.h)
-else()
-	install(FILES ${CSD}/register.h DESTINATION include/dc1394)
-endif()
-
-
 
 install(TARGETS libdc1394 EXPORT libdc1394-targets
 	ARCHIVE DESTINATION lib

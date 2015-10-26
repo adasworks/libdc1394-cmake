@@ -62,11 +62,13 @@ if(APPLE AND NOT IOS)
 	set(HAVE_MACOSX 1) # used in c am
 endif()
 check_include_file(netinet/in.h HAVE_NETINET_IN_H) # used in c
+check_include_file(unistd.h HAVE_UNISTD_H) # used in c
 find_package(OpenGL QUIET)
 if(OPENGL_FOUND)
 	set(HAVE_OPENGL 1) # used in am
 endif()
 check_include_file(sys/mman.h HAVE_SYS_MMAN_H) #used in c
+set(HAVE_NO_CMU1394 1)
 if(WIN32)
 	set(HAVE_WINDOWS 1) # used in c am
 endif()
@@ -89,9 +91,11 @@ foreach(v
 	HAVE_LINUX
 	HAVE_MACOSX
 	HAVE_NETINET_IN_H
+	HAVE_UNISTD_H
 	HAVE_OPENGL
 	HAVE_SYS_MMAN_H
 	HAVE_WINDOWS
+	HAVE_NO_CMU1394
 )
 	if(${v})
 		file(APPEND ${cfg} "#define ${v} 1\n")
@@ -180,12 +184,6 @@ if(EXAMPLESMSG)
 	message(STATUS "Build SDL/OpenGL examples:        ${SDLEXAMPLESMSG}")
 	message(STATUS "Build XV examples:                ${XVEXAMPLESMSG}")
 	message(STATUS "Build V4L examples:               ${VIDEXAMPLESMSG}")
-endif()
-
-# MSVC <= 2013 (12.0, 1800) does not support C `inline`
-if(MSVC AND MSVC_VERSION LESS 1900)
-	add_definitions(-Dinline=__inline)
-	# we also need to patch the installed register.h as well
 endif()
 
 if(HAVE_LIBUSB)
