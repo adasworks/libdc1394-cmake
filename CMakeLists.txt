@@ -38,6 +38,7 @@ if(OPENGL_FOUND)
 	set(HAVE_OPENGL 1) # used in am
 endif()
 check_include_file(sys/mman.h HAVE_SYS_MMAN_H) #used in c
+set(HAVE_NO_CMU1394 1)
 if(WIN32)
 	set(HAVE_WINDOWS 1) # used in c am
 endif()
@@ -64,6 +65,7 @@ foreach(v
 	HAVE_OPENGL
 	HAVE_SYS_MMAN_H
 	HAVE_WINDOWS
+	HAVE_NO_CMU1394
 )
 	if(${v})
 		file(APPEND ${cfg} "#define ${v} 1\n")
