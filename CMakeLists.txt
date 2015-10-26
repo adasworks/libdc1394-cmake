@@ -21,6 +21,14 @@ endif()
 
 set(repo ${CMAKE_CURRENT_SOURCE_DIR}/libdc1394/libdc1394)
 
+if(CMAKE_COMPILER_IS_GNUCC)
+	if(CMAKE_VERSION VERSION_LESS 3.1)
+		add_definitions(-std=c99)
+	else()
+		set(CMAKE_C_STANDARD 99)
+		set(CMAKE_C_STANDARD_REQUIRED 1)
+	endif()
+endif()
 
 include(CheckIncludeFile)
 include(CheckCSourceCompiles)
