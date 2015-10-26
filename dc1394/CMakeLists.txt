@@ -106,4 +106,20 @@ install(TARGETS libdc1394 EXPORT libdc1394-targets
 	ARCHIVE DESTINATION lib
 	LIBRARY DESTINATION lib
 	RUNTIME DESTINATION bin)
-install(EXPORT libdc1394-targets FILE libdc1394-config.cmake DESTINATION lib/cmake/libdc1394)
+install(EXPORT libdc1394-targets DESTINATION lib/cmake/libdc1394)
+set(cfg ${PROJECT_BINARY_DIR}/hide/libdc1394-config.cmake)
+file(WRITE ${cfg} "")
+if(HAVE_LIBUSB AND NOT BUILD_SHARED_LIBS)
+	file(APPEND ${cfg} "
+find_library(LIBDC1394_LIBUSB_LIBRARY NAMES usb-1.0 libusb-1.0)
+if(NOT LIBDC1394_LIBUSB_LIBRARY)
+	message(FATAL_ERROR \"libusb not found (this libdc1394 is built with libusb support).\")
+endif()
+add_library(libdc1394::libusb IMPORTED UNKNOWN)
+set_target_properties(libusb PROPERTIES IMPORTED_LOCATION \${LIBDC1394_LIBUSB_LIBRARY})
+	")
+endif()
+file(APPEND ${cfg} "
+include(\${CMAKE_CURRENT_LIST_DIR}/libdc1394-targets.cmake)
+	")
+install(FILES ${PROJECT_BINARY_DIR}/hide/libdc1394-config.cmake DESTINATION lib/cmake/libdc1394)

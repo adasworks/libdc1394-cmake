@@ -24,7 +24,26 @@ include(CheckCSourceCompiles)
 
 set(HAVE_LIBRAW1394 0) #used in c am
 set(HAVE_LIBSDL 0) #used in am
-set(HAVE_LIBUSB 0) # used in c, am
+
+find_library(LIBUSB_LIBRARY NAMES usb-1.0 libusb-1.0)
+find_file(LIBUSB_HEADER NAMES libusb-1.0/libusb.h)
+
+if(LIBUSB_LIBRARY AND LIBUSB_HEADER)
+	message(STATUS "Found libusb: ${LIBUSB_LIBRARY}, ${LIBUSB_HEADER}")
+	set(HAVE_LIBUSB 1)
+	add_library(libdc1394::libusb IMPORTED UNKNOWN)
+	get_filename_component(LIBUSB_INCLUDE_DIR "${LIBUSB_HEADER}" PATH)
+	set_target_properties(libdc1394::libusb PROPERTIES
+		IMPORTED_LOCATION ${LIBUSB_LIBRARY}
+		INTERFACE_INCLUDE_DIRECTORIES ${LIBUSB_INCLUDE_DIR})
+elseif(NOT HAVE_LIBUSB_LIBRARY AND NOT HAVE_LIBUSB_HEADER)
+	message(STATUS "Building without libusb.")
+	set(HAVE_LIBUSB 0)
+else()
+	cmake_print_variables(LIBUSB_LIBRARY LIBUSB_HEADER)
+	message(FATAL_ERROR "Found an incorrectly installed libusb, see previous lines.")
+endif()
+
 if(CMAKE_SYSTEM_NAME MATCHES "Linux")
 	set(HAVE_LINUX 1) # used in c am
 endif()
