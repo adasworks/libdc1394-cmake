@@ -5,5 +5,9 @@ set(usb_src
 	${CSD}/capture.c
 	PARENT_SCOPE)
 
-set(dc1394_link_libs ${dc1394_link_libs} PRIVATE libdc1394::libusb PARENT_SCOPE)
+if(NOT THREADS)
+	message(FATAL_ERROR "The usb subdirectory needs THREADS")
+endif()
+
+set(dc1394_link_libs ${dc1394_link_libs} PRIVATE libdc1394::libusb ${THREADS} PARENT_SCOPE)
 

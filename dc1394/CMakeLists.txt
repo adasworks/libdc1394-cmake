@@ -107,19 +107,64 @@ install(TARGETS libdc1394 EXPORT libdc1394-targets
 	LIBRARY DESTINATION lib
 	RUNTIME DESTINATION bin)
 install(EXPORT libdc1394-targets DESTINATION lib/cmake/libdc1394)
+
+# Create config module
 set(cfg ${PROJECT_BINARY_DIR}/hide/libdc1394-config.cmake)
-file(WRITE ${cfg} "")
+file(WRITE ${cfg} "unset(libdc1394_FOUND)\n\n")
+
+# libusb dependency
 if(HAVE_LIBUSB AND NOT BUILD_SHARED_LIBS)
 	file(APPEND ${cfg} "
-find_library(LIBDC1394_LIBUSB_LIBRARY NAMES usb-1.0 libusb-1.0)
-if(NOT LIBDC1394_LIBUSB_LIBRARY)
-	message(FATAL_ERROR \"libusb not found (this libdc1394 is built with libusb support).\")
-endif()
-add_library(libdc1394::libusb IMPORTED UNKNOWN)
-set_target_properties(libusb PROPERTIES IMPORTED_LOCATION \${LIBDC1394_LIBUSB_LIBRARY})
+		find_library(LIBDC1394_LIBUSB_LIBRARY NAMES usb-1.0 libusb-1.0)
+		if(NOT LIBDC1394_LIBUSB_LIBRARY)
+			message(\"libusb not found (this libdc1394 is built with libusb support).\")
+			set(libdc1394_FOUND 0)
+		endif()
+	")
+	if(CMAKE_VERSION VERSION_LESS 3.1)
+		file(APPEND ${cfg} "
+			set(CMAKE_THREAD_PREFER_PTHREAD 1)
+			find_package(Threads)
+			if(NOT CMAKE_THREAD_LIBS_INIT)
+				message(\"libdc1394: no thread libs found\")
+				set(libdc1394_FOUND 0)
+			elseif(NOT CMAKE_USE_PTHREADS_INIT)
+				message(FATAL_ERROR \"libdc1394 needs pthread, something else has been found.\")
+				set(libdc1394_FOUND 0)
+			else()
+				# here we can write what to do when threads found
+			endif()
+		")
+	else()
+		file(APPEND ${cfg} "
+			set(CMAKE_THREAD_PREFER_PTHREAD 1)
+			set(THREADS_PREFER_PTHREAD_FLAG 1)
+			find_package(Threads)
+			if(NOT CMAKE_THREAD_LIBS_INIT)
+				message(\"libdc1394: no thread libs found\")
+				set(libdc1394_FOUND 0)
+			elseif(NOT CMAKE_USE_PTHREADS_INIT)
+				message(FATAL_ERROR \"libdc1394 needs pthread, something else has been found.\")
+				set(libdc1394_FOUND 0)
+			else()
+				# here we can write what to do when threads found
+			endif()
+		")
+	endif()
+
+	file(APPEND ${cfg} "
+		if(NOT DEFINED libdc1349_FOUND)
+			add_library(libdc1394::libusb IMPORTED UNKNOWN)
+			set_target_properties(libusb PROPERTIES IMPORTED_LOCATION \${LIBDC1394_LIBUSB_LIBRARY})
+		endif()
 	")
 endif()
+
 file(APPEND ${cfg} "
-include(\${CMAKE_CURRENT_LIST_DIR}/libdc1394-targets.cmake)
-	")
+	if(NOT DEFINED libdc1394_FOUND)
+		include(\${CMAKE_CURRENT_LIST_DIR}/libdc1394-targets.cmake)
+	endif()
+")
 install(FILES ${PROJECT_BINARY_DIR}/hide/libdc1394-config.cmake DESTINATION lib/cmake/libdc1394)
+
+
