@@ -154,12 +154,6 @@ if(EXAMPLESMSG)
 	message(STATUS "Build V4L examples:               ${VIDEXAMPLESMSG}")
 endif()
 
-# MSVC <= 2013 (12.0, 1800) does not support C `inline`
-if(MSVC AND MSVC_VERSION LESS 1900)
-	add_definitions(-Dinline=__inline)
-	# we also need to patch the installed register.h as well
-endif()
-
 add_definitions(-DHAVE_CONFIG)
 set(CSD ${PROJECT_SOURCE_DIR}/libdc1394/libdc1394)
 add_subdirectory(dc1394)
