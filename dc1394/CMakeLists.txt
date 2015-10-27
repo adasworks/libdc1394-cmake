@@ -50,6 +50,9 @@ list(APPEND dc1394_sources
 	${usb_src}
 	${vendor_src}
 )
+if(USE_WINDOWS_THREADS)
+	list(APPEND dc1394_sources ${CSD}/pthread-windows.c ${CSD}/pthread-windows.h)
+endif()
 add_library(libdc1394 ${dc1394_sources})
 
 if(UNIX OR BUILD_SHARED_LIBS)
@@ -65,7 +68,7 @@ target_include_directories(libdc1394 PUBLIC
 	$<BUILD_INTERFACE:${CSD}/..>
 	$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
 	$<INSTALL_INTERFACE:include>)
-if(HAVE_WINDOWS)
+if(HAVE_WINDOWS AND NOT HAVE_NO_CMU1394)
 	target_include_directories(libdc1394 PRIVATE
 		${PROJECT_SOURCE_DIR}/1394camera646/1394camera)
 endif()
@@ -100,13 +103,15 @@ file(WRITE ${cfg} "unset(libdc1394_FOUND)\n\n")
 # libusb dependency
 if(HAVE_LIBUSB AND NOT BUILD_SHARED_LIBS)
 	file(APPEND ${cfg} "
-		find_library(LIBDC1394_LIBUSB_LIBRARY NAMES usb-1.0 libusb-1.0)
+		find_library(LIBDC1394_LIBUSB_LIBRARY NAMES usb-1.0 libusb-1.0 PATHS \${CMAKE_CURRENT_LIST_DIR}/../../libdc1394)
 		if(NOT LIBDC1394_LIBUSB_LIBRARY)
 			message(\"libusb not found (this libdc1394 is built with libusb support).\")
 			set(libdc1394_FOUND 0)
 		endif()
 	")
-	if(CMAKE_VERSION VERSION_LESS 3.1)
+	if(USE_WINDOWS_THREADS)
+		# we use windows threads there
+	elseif(CMAKE_VERSION VERSION_LESS 3.1)
 		# threads is hopefully added with -lpthreads so we don't need to call
 		# FindThreads here
 	else()

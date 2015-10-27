@@ -5,7 +5,7 @@ set(usb_src
 	${CSD}/capture.c
 	PARENT_SCOPE)
 
-if(NOT THREADS)
+if(NOT THREADS AND NOT (MSVC OR MINGW))
 	message(FATAL_ERROR "The usb subdirectory needs THREADS")
 endif()
 

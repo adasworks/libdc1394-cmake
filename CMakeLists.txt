@@ -36,8 +36,43 @@ include(CheckCSourceCompiles)
 set(HAVE_LIBRAW1394 0) #used in c am
 set(HAVE_LIBSDL 0) #used in am
 
-find_library(LIBUSB_LIBRARY NAMES usb-1.0 libusb-1.0)
-find_file(LIBUSB_HEADER NAMES libusb-1.0/libusb.h)
+if(MINGW OR MSVC)
+	set(ptrsize "")
+	if(DEFINED CMAKE_SIZEOF_VOID_P)
+		set(ptrsize ${CMAKE_SIZEOF_VOID_P})
+	endif()
+	if(DEFINED CMAKE_C_SIZEOF_DATA_PTR)
+		if(ptrsize STREQUAL "")
+			set(ptrsize ${CMAKE_C_SIZEOF_DATA_PTR})
+		elseif(NOT CMAKE_C_SIZEOF_DATA_PTR EQUAL ptrsize)
+			cmake_print_variables(CMAKE_SIZEOF_VOID_P CMAKE_C_SIZEOF_DATA_PTR)
+			message(FATAL_ERROR "Ambigous values (see previous lines)")
+		endif()
+	endif()
+	if(ptrsize STREQUAL "")
+		message(FATAL_ERROR "Can't retrieve pointer size from CMAKE_SIZEOF_VOID_P and CMAKE_C_SIZEOF_DATA_PTR")
+	elseif(NOT ptrsize EQUAL 4 AND NOT ptrsize EQUAL 8)
+		message(FATAL_ERROR "Invalid pointer size: ${ptrsize}")
+	endif()
+	set(wlroot ${PROJECT_SOURCE_DIR}/libusb-1.0.20-windows)
+	if(MINGW)
+		set(wllib ${wlroot}/MinGW)
+	elseif(MSVC)
+		set(wllib ${wlroot}/MS)
+	else()
+		message(FATAL_ERROR "Internal error")
+	endif()
+	if(ptrsize EQUAL 4)
+		set(wllib ${wllib}32/static)
+	else()
+		set(wllib ${wllib}64/static)
+	endif()
+	find_library(LIBUSB_LIBRARY NAMES usb-1.0 libusb-1.0 PATHS ${wllib} NO_DEFAULT_PATH)
+	find_file(LIBUSB_HEADER NAMES libusb-1.0/libusb.h PATHS ${wlroot}/include NO_DEFAULT_PATH)
+else()
+	find_library(LIBUSB_LIBRARY NAMES usb-1.0 libusb-1.0)
+	find_file(LIBUSB_HEADER NAMES libusb-1.0/libusb.h)
+endif()
 
 if(LIBUSB_LIBRARY AND LIBUSB_HEADER)
 	message(STATUS "Found libusb: ${LIBUSB_LIBRARY}, ${LIBUSB_HEADER}")
@@ -47,6 +82,10 @@ if(LIBUSB_LIBRARY AND LIBUSB_HEADER)
 	set_target_properties(libdc1394::libusb PROPERTIES
 		IMPORTED_LOCATION ${LIBUSB_LIBRARY}
 		INTERFACE_INCLUDE_DIRECTORIES ${LIBUSB_INCLUDE_DIR})
+	if(NOT BUILD_SHARED_LIBS AND (MINGW OR MSVC))
+		# found our own libusb, need to install it if static linking
+		install(FILES ${LIBUSB_LIBRARY} DESTINATION lib/libdc1394)
+	endif()
 elseif(NOT HAVE_LIBUSB_LIBRARY AND NOT HAVE_LIBUSB_HEADER)
 	message(STATUS "Building without libusb.")
 	set(HAVE_LIBUSB 0)
@@ -63,6 +102,9 @@ if(APPLE AND NOT IOS)
 endif()
 check_include_file(netinet/in.h HAVE_NETINET_IN_H) # used in c
 check_include_file(unistd.h HAVE_UNISTD_H) # used in c
+check_include_file(pthread.h HAVE_PTHREAD_H) # used in c
+check_include_file(Windows.h HAVE_WINDOWS_H) # used in c
+check_include_file(sys/time.h HAVE_SYS_TIME_H) # used in c
 find_package(OpenGL QUIET)
 if(OPENGL_FOUND)
 	set(HAVE_OPENGL 1) # used in am
@@ -71,6 +113,9 @@ check_include_file(sys/mman.h HAVE_SYS_MMAN_H) #used in c
 set(HAVE_NO_CMU1394 1)
 if(WIN32)
 	set(HAVE_WINDOWS 1) # used in c am
+endif()
+if(HAVE_LIBUSB AND NOT HAVE_PTHREAD_H AND HAVE_WINDOWS_H)
+	set(USE_WINDOWS_THREADS 1)
 endif()
 set(PACKAGE "libdc1394") # used in am
 set(C99_RESTRICT "")
@@ -96,6 +141,9 @@ foreach(v
 	HAVE_SYS_MMAN_H
 	HAVE_WINDOWS
 	HAVE_NO_CMU1394
+	USE_WINDOWS_THREADS
+	HAVE_SYS_TIME_H
+	HAVE_WINDOWS_H
 )
 	if(${v})
 		file(APPEND ${cfg} "#define ${v} 1\n")
@@ -186,7 +234,7 @@ if(EXAMPLESMSG)
 	message(STATUS "Build V4L examples:               ${VIDEXAMPLESMSG}")
 endif()
 
-if(HAVE_LIBUSB)
+if(HAVE_LIBUSB AND NOT USE_WINDOWS_THREADS)
 	if(CMAKE_VERSION VERSION_LESS 3.1)
 		set(CMAKE_THREAD_PREFER_PTHREAD 1)
 		find_package(Threads REQUIRED)
@@ -199,7 +247,7 @@ if(HAVE_LIBUSB)
 		set(THREADS_PREFER_PTHREAD_FLAG 1)
 		find_package(Threads REQUIRED)
 		if(NOT CMAKE_USE_PTHREADS_INIT)
-			message(FATAL_ERROR "usb/control.c needs pthread, something else has been found.")
+			message(FATAL_ERROR "usb/control.c needs pthread, something else has been found: \"${CMAKE_THREAD_LIBS_INIT}\"")
 		endif()
 		set(THREADS Threads::Threads)
 	endif()
