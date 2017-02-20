@@ -11,7 +11,9 @@ if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/libdc1394)
         COMMAND ${GIT_EXECUTABLE}
             clone --depth 1
             	# git://git.code.sf.net/p/libdc1394/code # original project
-            	https://git.code.sf.net/u/adasworks/libdc1394 # adasworks fork
+            	# git://git.code.sf.net/u/adasworks/libdc1394 # adasworks fork
+            	# https://git.code.sf.net/u/adasworks/libdc1394 # adasworks fork
+            	https://github.com/aimotive/libdc1394.git # mirror
             	${CMAKE_CURRENT_SOURCE_DIR}/libdc1394
         RESULT_VARIABLE r)
     if(r)
